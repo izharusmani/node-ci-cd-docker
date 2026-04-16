@@ -1,0 +1,23 @@
+name: Deploy
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    needs: docker
+
+    steps:
+      - name: SSH Deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ubuntu
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            docker pull izharusmani/nodejsapp:latest
+            docker stop nodeapp || true
+            docker rm nodeapp || true
+            docker run -d -p 3000:3000 --name nodeapp izharusmani/nodejsapp:latest
